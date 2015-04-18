@@ -1,12 +1,41 @@
 import cv2
 import numpy as np
 import argparse
-import math
+from math import sqrt, cos, pi
+
+coef_const = 1/sqrt(2)
+
+def cosines(x,i,n) :
+  return cos((( 2*x+1 )*i*pi )/ 2*n)
+
+def coef(x) :
+  if x == 0 :
+    return (0.707106781187)
+  else :
+    return 1
+
+def dct(mat) :
+  (h,w) = mat.shape[:2]
+  np.subtract(mat, 128)
+  ret = np.zeros((h,w))
+  n = h
+  for v in range(8) :
+    for u in range(8) :
+      temp = 0.0
+      for y in range(8) :
+        for x in range(8) :          
+          temp += cosines(x,u,n) * cosines(y,v,n) * mat[y][x]
+      temp *= (0.25) *coef(u)*coef(v)
+      ret[v][u] = (temp)
+
+  print(ret)
+  return ret
 
 def main() :
   
   # Load lossless test image
   img1 = cv2.imread("lossless.png")
+  (h,w) = img1.shape[:2]
   
   # Convert and separate RGB values to Y Cb Cr values
   Y =  img1[:,:,2]*(0.299) +     img1[:,:,1]*(0.587) +     img1[:,:,0]*0.114
@@ -43,13 +72,18 @@ def main() :
   Cb = cv2.resize(Cb, (len(Cb[0]/2),len(Cb/2)))
   Cr = cv2.resize(Cr, (len(Cr[0]/2),len(Cr/2)))
 
-  # DCT
-  cv2.dct(Y, Y)
-  cv2.dct(Cb, Cb)
-  cv2.dct(Cr, Cr)
-  #for y in len(Y)/8 :
-  #  for x in len(Y[0])/8 :
-      
+  # Example matrix from wikipedia
+  temp_mat = np.array([[52,55,61,66, 70, 61, 64,73],
+                       [63,59,55,90, 109,85, 69,72],
+                       [62,59,68,113,114,104,66,73],
+                       [63,58,71,122,154,106,70,69],
+                       [67,61,68,104,126,88, 68,70],
+                       [79,65,60,70, 77, 68, 58,75],
+                       [85,71,64,59, 55, 61, 65,83],
+                       [87,79,69,68, 65, 76, 78,94]]).astype(float)
 
+  temp_mat = np.subtract(temp_mat2, 128)
+  dct_mat = dct(temp_mat)
+  #print(dct_mat)
 
 main()
