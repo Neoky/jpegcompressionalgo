@@ -29,7 +29,7 @@ def dct(mat) :
             for x in range(8) :          
               temp += cosines(x,u,n) * cosines(y,v,n) * sub_mat[j+y][i+x]
           temp *= (0.25) *coef(u)*coef(v)
-          temp_mat[v][u] = float(temp)
+          temp_mat[v][u] = round(temp,3)
       ret[j:j+8,i:i+8] = temp_mat
 
   return ret
@@ -39,7 +39,7 @@ def quant(dct_mat, quant_mat) :
   for j in range(0,h,8) :
     for i in range(0,w,8) :
       dct_mat[j:j+8,i:i+8] = np.divide(dct_mat[j:j+8,i:i+8], quant_mat)
-  return dct_mat
+  return np.rint(dct_mat)
 
 def main() :
   
@@ -60,19 +60,28 @@ def main() :
   cv2.imwrite("YCrCb.png", YCbCr)
 
   # Initialize luminance and chrominance matrixes
-  luminance_matrix = [[16,12,14,14,18,24,49,72],
-                      [11,12,13,17,22,35,64,92],
-                      [10,14,16,22,37,55,78,95],
-                      [16,19,24,29,56,64,87,98],
-                      [24,26,40,51,68,81,103,112],
-                      [40,58,57,87,109,104,121,100],
-                      [51,60,69,80,103,113,120,103],
-                      [61,55,56,62,77,92,101,99]]
+  luminance_matrix = [[16,11,10,16,24,40,51,61],
+                      [12,12,14,19,26,58,60,55],
+                      [14,13,16,24,40,57,69,56],
+                      [14,17,22,29,51,87,80,62],
+                      [18,22,37,56,68,109,103,77],
+                      [24,35,55,64,81,104,113,92],
+                      [49,64,78,87,103,121,120,101],
+                      [72,92,95,98,112,100,103,99]]
+
+  luminance_matrixrot = [[16,12,14,14,18,24,49,72],
+                        [11,12,13,17,22,35,64,92],
+                        [10,14,16,22,37,55,78,95],
+                        [16,19,24,29,56,64,87,98],
+                        [24,26,40,51,68,81,103,112],
+                        [40,58,57,87,109,104,121,100],
+                        [51,60,69,80,103,113,120,103],
+                        [61,55,56,62,77,92,101,99]]
 
   chrominance_matrix = [[17,18,24,47,99,99,99,99],
-                        [18,21,26,99,99,99,99,99],
+                        [18,21,26,66,99,99,99,99],
                         [24,26,56,99,99,99,99,99],
-                        [47,66,99,99,99,99,99,99],
+                        [47,99,99,99,99,99,99,99],
                         [99,99,99,99,99,99,99,99],
                         [99,99,99,99,99,99,99,99],
                         [99,99,99,99,99,99,99,99],
@@ -94,6 +103,7 @@ def main() :
   
   # Perform DCT on Y Cb Cr
   dct_Y = dct(Y)
+  print(dct_Y)
   dct_Cb = dct(Cb)
   dct_Cr = dct(Cr)
 
@@ -102,6 +112,13 @@ def main() :
   quant_Cb = quant(dct_Cb,chrominance_matrix)
   quant_Cr = quant(dct_Cr,chrominance_matrix)
   print(quant_Y)
+  
+  x = 0
+  for i in range(len(quant_Y)) :
+    for j in range(len(quant_Y[0])) :
+      if quant_Y[i][j] == 0 :
+        x += 1
+  print(x)
       
       
   
