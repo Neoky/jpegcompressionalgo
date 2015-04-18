@@ -18,15 +18,17 @@ def dct(mat) :
   (h,w) = mat.shape[:2]
   np.subtract(mat, 128)
   ret = np.zeros((h,w))
-  n = h
-  for v in range(8) :
-    for u in range(8) :
-      temp = 0.0
-      for y in range(8) :
-        for x in range(8) :          
-          temp += cosines(x,u,n) * cosines(y,v,n) * mat[y][x]
-      temp *= (0.25) *coef(u)*coef(v)
-      ret[v][u] = (temp)
+  n = 8
+  for j in range(0,h,8) :
+    for i in range(0,w,8) :
+      for v in range(j,j+8) :
+        for u in range(i,i+8) :
+          temp = 0.0
+          for y in range(j,j+8) :
+            for x in range(i,i+8) :          
+              temp += cosines(x,u,n) * cosines(y,v,n) * mat[y][x]
+          temp *= (0.25) *coef(u)*coef(v)
+          ret[v][u] = (temp)
 
   print(ret)
   return ret
@@ -82,8 +84,9 @@ def main() :
                        [85,71,64,59, 55, 61, 65,83],
                        [87,79,69,68, 65, 76, 78,94]]).astype(float)
 
-  temp_mat = np.subtract(temp_mat2, 128)
-  dct_mat = dct(temp_mat)
+  #temp_mat = np.subtract(temp_, 128)
+  print(cv2.dct(Y))
+  dct_mat = dct(Y)
   #print(dct_mat)
 
 main()
