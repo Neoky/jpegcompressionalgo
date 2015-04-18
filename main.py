@@ -34,6 +34,13 @@ def dct(mat) :
 
   return ret
 
+def quant(dct_mat, quant_mat) :
+  (h,w) = dct_mat.shape[:2]
+  for j in range(0,h,8) :
+    for i in range(0,w,8) :
+      dct_mat[j:j+8,i:i+8] = np.divide(dct_mat[j:j+8,i:i+8], quant_mat)
+  return dct_mat
+
 def main() :
   
   # Load lossless test image
@@ -84,14 +91,19 @@ def main() :
                        [79,65,60,70, 77, 68, 58,75],
                        [85,71,64,59, 55, 61, 65,83],
                        [87,79,69,68, 65, 76, 78,94]]).astype(float)
-
-  #temp_mat = np.subtract(temp_, 128)
-  #print("PRINTING CV2 DCT")
-  #test = Y[0:8,0:8]
-  #test = np.subtract(test,128)
-  #print(cv2.dct(np.subtract(test,128)))
-  #print(cv2.dct(np.subtract(Y,128)))
+  
+  # Perform DCT on Y Cb Cr
   dct_Y = dct(Y)
-  print(dct_Y)
+  dct_Cb = dct(Cb)
+  dct_Cr = dct(Cr)
+
+  # Perform Quantization
+  quant_Y = quant(dct_Y,luminance_matrix)
+  quant_Cb = quant(dct_Cb,chrominance_matrix)
+  quant_Cr = quant(dct_Cr,chrominance_matrix)
+  print(quant_Y)
+      
+      
+  
 
 main()
