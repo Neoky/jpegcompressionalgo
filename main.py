@@ -7,6 +7,7 @@ def main() :
   
   # Load lossless test image
   img1 = cv2.imread("lossless.png")
+  (h,w) = img1.shape[:2]
   
   # Convert and separate RGB values to Y Cb Cr values
   Y =  img1[:,:,2]*(0.299) +     img1[:,:,1]*(0.587) +     img1[:,:,0]*0.114
@@ -43,6 +44,13 @@ def main() :
   Cb = cv2.resize(Cb, (len(Cb[0]/2),len(Cb/2)))
   Cr = cv2.resize(Cr, (len(Cr[0]/2),len(Cr/2)))
 
+  # DCT
+  cv2.dct(Y, Y)
+  cv2.dct(Cb, Cb)
+  cv2.dct(Cr, Cr)
+  #for y in len(Y)/8 :
+  #  for x in len(Y[0])/8 :
+      
 
 
 main()
