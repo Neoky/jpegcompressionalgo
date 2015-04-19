@@ -15,6 +15,7 @@ def coef(x) :
 
 def dct(mat) :
   (h,w) = mat.shape[:2]
+  print(h,w)
   sub_mat = np.subtract(mat, 128)
   ret = np.zeros((h,w))
   n=h
@@ -42,12 +43,11 @@ def idct(mat) :
           temp = 0.0
           for y in range(8) :
             for x in range(8) :  
-              temp += cosines(x,u,n) * cosines(y,v,n) * mat[j+y][i+x] * temp*(0.25)*coef(u)*coef(v)
+              temp += cosines(x,u,n) * cosines(y,v,n) * mat[j+y][i+x] * (0.25)*coef(u)*coef(v)
+
           ret[j+v][i+u] = round(temp,3)
 
-  return ret
-
-
+  return np.add(ret,128)
 
 def quant(dct_mat, quant_mat) :
   (h,w) = dct_mat.shape[:2]
@@ -61,7 +61,7 @@ def dequant(dct_mat, quant_mat) :
   for j in range(0,h,8) :
     for i in range(0,w,8) :
       dct_mat[j:j+8,i:i+8] = np.multiply(dct_mat[j:j+8,i:i+8], quant_mat)
-  return np.rint(np.add(dct_mat,128)).astype(int)
+  return np.rint(dct_mat).astype(int)
 
 def countNonZero(mat):
   # Return the total number of non-zeroes in matrix
@@ -86,7 +86,6 @@ def dpcm(dct_mat):
     dpcm_list.append(temp[idx+1]-temp[idx])
 
   return dpcm_list
-
 
 def main() :
   
@@ -135,8 +134,22 @@ def main() :
                         [99,99,99,99,99,99,99,99]]
 
   # perform chroma subsampling
-  Cb = cv2.resize(Cb, (len(Cb[0]/2),len(Cb/2)))
-  Cr = cv2.resize(Cr, (len(Cr[0]/2),len(Cr/2)))
+  #Cb = cv2.resize(Cb, (len(Cb[0]/2),len(Cb/2)))
+  #Cr = cv2.resize(Cr, (len(Cr[0]/2),len(Cr/2)))
+  #Cb = resize(Cb, len(Cb[0]/2),len(Cb/2))
+  #Cr = resize(Cr, len(Cr[0]/2),len(Cr/2))
+  smCb = np.zeros((len(Y)/2, len(Y[0])/2))
+  smCr = np.zeros((len(Y)/2, len(Y[0])/2))
+  for y in range(0,len(Cb),2) :
+    for x in range(0,len(Cb[0]),2) :
+      smCb[int(y/2)][int(x/2)] = Cb[y][x]
+      smCr[int(y/2)][int(x/2)] = Cr[y][x]
+
+  Cb = smCb
+  Cr = smCr
+  
+  (h,w) = Cb.shape[:2]
+  print(h,w)
 
   # Example matrix from wikipedia
   temp_mat2 = np.array([[52,55,61,66, 70, 61, 64,73],
@@ -161,12 +174,13 @@ def main() :
   dct_Cb = dct(Cb)
   dct_Cr = dct(Cr)
   #print(Y)
-  #print(dct_Y)
+  print(dct_Y)
 
   # Perform Quantization
   quant_Y = quant(dct_Y,luminance_matrix)
   quant_Cb = quant(dct_Cb,chrominance_matrix)
   quant_Cr = quant(dct_Cr,chrominance_matrix)
+  print(quant_Y)
 
   # Test for quantization
   test_matrix = np.array([[-415.38,-30.19,-61.2,27.24,56.12,-20.10,-2.39,0.46],
@@ -205,23 +219,49 @@ def main() :
   dequant_Y = dequant(quant_Y, luminance_matrix)
   dequant_Cb = dequant(quant_Cr, chrominance_matrix)
   dequant_Cr = dequant(quant_Cr, chrominance_matrix)
+  print(dequant_Y)
 
   idct_Y = idct(dequant_Y)
   idct_Cb = idct(dequant_Cb)
   idct_Cr = idct(dequant_Cr)
+  print(idct_Y)
 
-  Cb = cv2.resize(idct_Cb, (len(Y[0]),len(Y)))
-  for x in np.nditer(Cb):
-    if x != 0 :
-      print(x)
-  Cr = cv2.resize(idct_Cr, (len(Y[0]),len(Y)))
+  #for x in np.nditer(idct_Cb) :
+  #  if x > 255 :
+  #    print(x)
+  #Cb = cv2.resize(idct_Cb, (len(Y[0]),len(Y)))
+  #Cr = cv2.resize(idct_Cr, (len(Y[0]),len(Y)))
+  Cb = np.zeros((len(Y),len(Y[0])))
+  Cr = np.zeros((len(Y),len(Y[0])))
+  for y in range(0,len(Cb),2) :
+    for x in range(0,len(Cb[0]),2) :
+      Cb[y][x] = Cb[y][x+1] = Cb[y+1][x] = Cb[y+1][x+1] = idct_Cb[int(y/2)][int(x/2)]
+      Cr[y][x] = Cr[y][x+1] = Cr[y+1][x] = Cr[y+1][x+1] = idct_Cr[int(y/2)][int(x/2)]
+
   Y  = idct_Y
 
+  for x in np.nditer(Cb) :
+    if x > 255 :
+      x = 255
+  for x in np.nditer(Cr) :
+    if x > 255 :
+      x = 255
+
+  print(Cb)
+  (h,w) = Y.shape[:2]
+  print(h,w)
+
   RGB = np.zeros((len(img1), len(img1[0]), 3))
-  RGB[:,:,2] = Y + 1.402 * (Cr-128)
-  RGB[:,:,1] = Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)
-  RGB[:,:,0] = Y + 1.772 * (Cb-128)
-  cv2.imwrite("pleasework.jpg",RGB)
+  (h,w,c) = RGB.shape
+  print(h,w,c)
+  RGB[:,:,2] = Y + 1.402 * (Cr-128)#np.add(Y, np.multiply(1.772, np.subtract(Cb,128)))#Y + 1.772 * (Cb-128)
+  RGB[:,:,1] = Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)#np.subtract(np.subtract(Y, np.multiply(0.34414, np.subtract(Cb,128))), np.multiply(-0.71414, np.subtract(Cr,128)))#Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)
+  RGB[:,:,0] = Y + 1.772 * (Cb-128)#np.multiply(np.add(Y,1.402), np.subtract(Cr,128))
+  cv2.imwrite("pleasework.jpg",RGB.astype(int))
+  RGB[:,:,2] = Y + 1.772 * (Cb-128)#np.add(Y, np.multiply(1.772, np.subtract(Cb,128)))#Y + 1.772 * (Cb-128)
+  RGB[:,:,1] = Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)#np.subtract(np.subtract(Y, np.multiply(0.34414, np.subtract(Cb,128))), np.multiply(-0.71414, np.subtract(Cr,128)))#Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)
+  RGB[:,:,0] = Y + 1.402 * (Cr-128)#np.multiply(np.add(Y,1.402), np.subtract(Cr,128))
+  cv2.imwrite("pleasework2.jpg",RGB.astype(int))
 
   #print(dpcm_Y)
   #print(dpcm_Cb)
