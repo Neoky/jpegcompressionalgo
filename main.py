@@ -32,6 +32,8 @@ def dct(mat) :
 
   return ret
 
+
+
 def idct(mat) :
   (h,w) = mat.shape[:2]
   ret = np.zeros((h,w))
@@ -171,7 +173,7 @@ def main() :
   Cr = smCr
   
   (h,w) = Cb.shape[:2]
-  print(h,w)
+  #print(h,w)
 
   # Example matrix from wikipedia
   temp_mat2 = np.array([[52,55,61,66, 70, 61, 64,73],
@@ -192,17 +194,17 @@ def main() :
                       [210, 200, 200, 200, 188, 185, 187, 186]]).astype(float)
   #print(dct(temp_mat).astype(int))
   # Perform DCT on Y Cb Cr
-  dct_Y = dct(Y)
-  dct_Cb = dct(Cb)
-  dct_Cr = dct(Cr)
+  dct_Y = (np.rint(dct(Y))).astype(int)
+  dct_Cb = (np.rint(dct(Cb))).astype(int)
+  dct_Cr = (np.rint(dct(Cr))).astype(int)
   #print(Y)
-  print(dct_Y)
-
+  print(dct_Cb)
+  #return
   # Perform Quantization
   quant_Y = quant(dct_Y,luminance_matrix)
   quant_Cb = quant(dct_Cb,chrominance_matrix)
   quant_Cr = quant(dct_Cr,chrominance_matrix)
-  print(quant_Y)
+  print(quant_Cb)
 
   # Test for quantization
   test_matrix = np.array([[-415.38,-30.19,-61.2,27.24,56.12,-20.10,-2.39,0.46],
@@ -242,12 +244,12 @@ def main() :
   dequant_Y = dequant(quant_Y, luminance_matrix)
   dequant_Cb = dequant(quant_Cr, chrominance_matrix)
   dequant_Cr = dequant(quant_Cr, chrominance_matrix)
-  print(dequant_Y)
+  #print(dequant_Y)
 
   idct_Y = idct(dequant_Y)
   idct_Cb = idct(dequant_Cb)
   idct_Cr = idct(dequant_Cr)
-  print(idct_Y)
+  #print(idct_Y)
 
   #for x in np.nditer(idct_Cb) :
   #  if x > 255 :
@@ -270,13 +272,13 @@ def main() :
     if x > 255 :
       x = 255
 
-  print(Cb)
+  #print(Cb)
   (h,w) = Y.shape[:2]
-  print(h,w)
+  #print(h,w)
 
   RGB = np.zeros((len(img1), len(img1[0]), 3))
   (h,w,c) = RGB.shape
-  print(h,w,c)
+  #print(h,w,c)
   RGB[:,:,2] = Y + 1.402 * (Cr-128)#np.add(Y, np.multiply(1.772, np.subtract(Cb,128)))#Y + 1.772 * (Cb-128)
   RGB[:,:,1] = Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)#np.subtract(np.subtract(Y, np.multiply(0.34414, np.subtract(Cb,128))), np.multiply(-0.71414, np.subtract(Cr,128)))#Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)
   RGB[:,:,0] = Y + 1.772 * (Cb-128)#np.multiply(np.add(Y,1.402), np.subtract(Cr,128))
