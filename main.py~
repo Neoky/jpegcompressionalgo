@@ -198,6 +198,7 @@ def main() :
   dpcm_Y = dpcm(dct_Y)
   dpcm_Cb = dpcm(dct_Cb)
   dpcm_Cr =  dpcm(dct_Cr)
+<<<<<<< HEAD
   #print(dpcm_Y)
   #print(dpcm_Cb)
   #print(dpcm_Cr)
@@ -211,7 +212,7 @@ def main() :
   idct_Cr = idct(dequant_Cr)
 
   Cb = cv2.resize(idct_Cb, (len(Y[0]),len(Y)))
-  for x in np.nditer(dequant_Cb):
+  for x in np.nditer(Cb):
     if x != 0 :
       print(x)
   Cr = cv2.resize(idct_Cr, (len(Y[0]),len(Y)))
@@ -222,6 +223,11 @@ def main() :
   RGB[:,:,1] = Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)
   RGB[:,:,0] = Y + 1.772 * (Cb-128)
   cv2.imwrite("pleasework.jpg",RGB)
+=======
+>>>>>>> 212fc7d1c7deb128c66895352ab44c88bffbd645
 
+  #print(dpcm_Y)
+  #print(dpcm_Cb)
+  #print(dpcm_Cr)
 
 main()

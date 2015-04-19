@@ -223,5 +223,8 @@ def main() :
   RGB[:,:,0] = Y + 1.772 * (Cb-128)
   cv2.imwrite("pleasework.jpg",RGB)
 
+  #print(dpcm_Y)
+  #print(dpcm_Cb)
+  #print(dpcm_Cr)
 
 main()
