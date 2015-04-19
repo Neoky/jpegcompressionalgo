@@ -31,12 +31,37 @@ def dct(mat) :
 
   return ret
 
+def idct(mat) :
+  (h,w) = mat.shape[:2]
+  ret = np.zeros((h,w))
+  n=h
+  for j in range(0,h,8) :
+    for i in range(0,w,8) :
+      for v in range(8) :
+        for u in range(8) :
+          temp = 0.0
+          for y in range(8) :
+            for x in range(8) :  
+              temp += cosines(x,u,n) * cosines(y,v,n) * mat[j+y][i+x] * temp*(0.25)*coef(u)*coef(v)
+          ret[j+v][i+u] = round(temp,3)
+
+  return ret
+
+
+
 def quant(dct_mat, quant_mat) :
   (h,w) = dct_mat.shape[:2]
   for j in range(0,h,8) :
     for i in range(0,w,8) :
       dct_mat[j:j+8,i:i+8] = np.divide(dct_mat[j:j+8,i:i+8], quant_mat)
   return np.rint(dct_mat).astype(int)
+
+def dequant(dct_mat, quant_mat) :
+  (h,w) = dct_mat.shape[:2]
+  for j in range(0,h,8) :
+    for i in range(0,w,8) :
+      dct_mat[j:j+8,i:i+8] = np.multiply(dct_mat[j:j+8,i:i+8], quant_mat)
+  return np.rint(np.add(dct_mat,128)).astype(int)
 
 def countNonZero(mat):
   # Return the total number of non-zeroes in matrix
@@ -62,6 +87,7 @@ def dpcm(dct_mat):
 
   return dpcm_list
 
+<<<<<<< HEAD
 def rlcMe(quant_mat):
   rlc_array = np.array([  [0,    1,  5,   6, 14,  15, 27,  28],  
                           [2,    4,  7,  13, 16,  26, 29,  42], 
@@ -73,6 +99,8 @@ def rlcMe(quant_mat):
                           [35,  36, 48,  49, 57,  58, 62,  63]])
 
 
+=======
+>>>>>>> 63a051e4c59fe2ed6309a6d6dbad27d91f4bb414
 
 def main() :
   
@@ -185,6 +213,30 @@ def main() :
   dpcm_Y = dpcm(dct_Y)
   dpcm_Cb = dpcm(dct_Cb)
   dpcm_Cr =  dpcm(dct_Cr)
+  #print(dpcm_Y)
+  #print(dpcm_Cb)
+  #print(dpcm_Cr)
+
+  dequant_Y = dequant(quant_Y, luminance_matrix)
+  dequant_Cb = dequant(quant_Cr, chrominance_matrix)
+  dequant_Cr = dequant(quant_Cr, chrominance_matrix)
+
+  idct_Y = idct(dequant_Y)
+  idct_Cb = idct(dequant_Cb)
+  idct_Cr = idct(dequant_Cr)
+
+  Cb = cv2.resize(idct_Cb, (len(Y[0]),len(Y)))
+  for x in np.nditer(Cb):
+    if x != 0 :
+      print(x)
+  Cr = cv2.resize(idct_Cr, (len(Y[0]),len(Y)))
+  Y  = idct_Y
+
+  RGB = np.zeros((len(img1), len(img1[0]), 3))
+  RGB[:,:,2] = Y + 1.402 * (Cr-128)
+  RGB[:,:,1] = Y - 0.34414 * (Cb - 128) -0.71414 * (Cr-128)
+  RGB[:,:,0] = Y + 1.772 * (Cb-128)
+  cv2.imwrite("pleasework.jpg",RGB)
 
   #print(dpcm_Y)
   #print(dpcm_Cb)
