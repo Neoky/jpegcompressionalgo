@@ -87,6 +87,28 @@ def dpcm(dct_mat):
 
   return dpcm_list
 
+
+def rlcMe(mat):
+  rlc_array = np.array([  [0,    1,  5,   6, 14,  15, 27,  28],  
+                          [2,    4,  7,  13, 16,  26, 29,  42], 
+                          [3,    8, 12,  17, 25,  30, 41,  43],  
+                          [9,   11, 18,  24, 31,  40, 44,  53],                 
+                          [10,  19, 23,  32, 39,  45, 52,  54],  
+                          [20,  22, 33,  38, 46,  51, 55,  60],  
+                          [21,  34, 37,  47, 50,  56, 59,  61],  
+                          [35,  36, 48,  49, 57,  58, 62,  63]])
+  temp = mat.flatten()
+  rlc_vector = []
+  rlc_array = rlc_array.flatten()
+  for i in range(64):
+
+    # Find the correct index
+    for j in range(64):
+      if i == rlc_array[j]:
+        rlc_vector.append(temp[j])
+        break
+  return rlc_vector
+
 def main() :
   
   # Load lossless test image
@@ -191,6 +213,7 @@ def main() :
                 [-7.73,2.91,2.38,-5.94,-2.38,0.94,4.30,1.85],
                 [-1.03,0.18,0.42,-2.42,-0.88,-3.02,4.12,-0.66],
                 [-0.17,0.14,-1.07,-4.19,-1.17,-0.1,0.5,1.68]])
+  
   test_quest = np.array([[16,11,10,16,24,40,51,61],
                 [12,12,14,19,26,58,60,55],
                 [14,13,16,24,40,57,69,56],
@@ -266,5 +289,6 @@ def main() :
   #print(dpcm_Y)
   #print(dpcm_Cb)
   #print(dpcm_Cr)
+
 
 main()
