@@ -87,8 +87,8 @@ def dpcm(dct_mat):
 
   return dpcm_list
 
-<<<<<<< HEAD
-def rlcMe(quant_mat):
+
+def rlcMe(mat):
   rlc_array = np.array([  [0,    1,  5,   6, 14,  15, 27,  28],  
                           [2,    4,  7,  13, 16,  26, 29,  42], 
                           [3,    8, 12,  17, 25,  30, 41,  43],  
@@ -97,10 +97,17 @@ def rlcMe(quant_mat):
                           [20,  22, 33,  38, 46,  51, 55,  60],  
                           [21,  34, 37,  47, 50,  56, 59,  61],  
                           [35,  36, 48,  49, 57,  58, 62,  63]])
+  temp = mat.flatten()
+  rlc_vector = []
+  rlc_array = rlc_array.flatten()
+  for i in range(64):
 
-
-=======
->>>>>>> 63a051e4c59fe2ed6309a6d6dbad27d91f4bb414
+    # Find the correct index
+    for j in range(64):
+      if i == rlc_array[j]:
+        rlc_vector.append(temp[j])
+        break
+  return rlc_vector
 
 def main() :
   
@@ -129,6 +136,9 @@ def main() :
                       [24,35,55,64,81,104,113,92],
                       [49,64,78,87,103,121,120,101],
                       [72,92,95,98,112,100,103,99]]
+
+  print(rlcMe(np.array(luminance_matrix)))
+  return
 
   luminance_matrixrot = [[16,12,14,14,18,24,49,72],
                         [11,12,13,17,22,35,64,92],
