@@ -38,6 +38,29 @@ def quant(dct_mat, quant_mat) :
       dct_mat[j:j+8,i:i+8] = np.divide(dct_mat[j:j+8,i:i+8], quant_mat)
   return np.rint(dct_mat).astype(int)
 
+def countNonZero(mat):
+  # Return the total number of non-zeroes in matrix
+  (h,w) = mat.shape[:2]
+  tally = 0
+  for i in range(h):
+    for j in range(w):
+      if mat[i,j] != 0:
+        tally += 1
+
+  return tally
+
+def dpcm(dct_mat):
+  (h,w) = dct_mat.shape[:2]
+  dpcm_list = []
+  temp = dct_mat.flatten()
+  # d0 = DC0
+  dpcm_list.append(temp[0])
+
+  # di = DCi+1 - DCi
+  for idx in range(0,h*w-1):
+    dpcm_list.append(temp[idx+1]-temp[idx])
+
+  return dpcm_list
 def main() :
   
   # Load lossless test image
@@ -117,9 +140,8 @@ def main() :
   quant_Y = quant(dct_Y,luminance_matrix)
   quant_Cb = quant(dct_Cb,chrominance_matrix)
   quant_Cr = quant(dct_Cr,chrominance_matrix)
-  #print(quant_Y)
 
-
+  # Test for quantization
   test_matrix = np.array([[-415.38,-30.19,-61.2,27.24,56.12,-20.10,-2.39,0.46],
                 [4.47,-21.86,-60.76,10.25,13.15,-7.09,-8.54,4.88],
                 [-46.83,7.37,77.13,-24.56,-28.91,9.93,5.52,-5.65],
@@ -136,6 +158,22 @@ def main() :
                 [24,35,55,64,81,104,113,92],
                 [49,64,78,87,103,121,120,101],
                 [72,92,95,98,112,100,103,99]])
+
   
+  # Count the number of non-zeroes dct coefficients in Y, Cb, Cr matrices
+  nonZero_Y = countNonZero(dct_Y)
+  nonZero_Cb = countNonZero(dct_Cb)
+  nonZero_Cr =  countNonZero(dct_Cr)
+
+  print("non-zeroes (Y,Cb,Cr):",nonZero_Y,nonZero_Cb,nonZero_Cr)
+
+  # Generate DPCM
+  dpcm_Y = dpcm(dct_Y)
+  dpcm_Cb = dpcm(dct_Cb)
+  dpcm_Cr =  dpcm(dct_Cr)
+  print(dpcm_Y)
+  print(dpcm_Cb)
+  print(dpcm_Cr)
+
 
 main()
